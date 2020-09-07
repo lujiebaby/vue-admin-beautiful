@@ -1,15 +1,14 @@
-import { handleRandomImage } from "../utils";
 const accessTokens = {
   admin: "admin-accessToken",
   editor: "editor-accessToken",
   test: "test-accessToken",
 };
 
-export default [
+module.exports = [
   {
     url: "/publicKey",
     type: "post",
-    response(config) {
+    response() {
       return {
         code: 200,
         msg: "success",
@@ -83,7 +82,6 @@ export default [
       };
     },
   },
-
   {
     url: "/logout",
     type: "post",

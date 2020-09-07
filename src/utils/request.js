@@ -44,6 +44,7 @@ const handleCode = (code, msg) => {
     case invalidCode:
       Vue.prototype.$baseMessage(msg || `后端接口${code}异常`, "error");
       store.dispatch("user/resetAccessToken").catch(() => {});
+      location.reload();
       break;
     case noPermissionCode:
       router.push({ path: "/401" }).catch(() => {});
@@ -75,7 +76,6 @@ instance.interceptors.request.use(
       );
 
     if (
-      process.env.NODE_ENV !== "preview" &&
       contentType === "application/x-www-form-urlencoded;charset=UTF-8" &&
       config.data
     ) {
@@ -119,6 +119,20 @@ instance.interceptors.response.use(
     if (error.response && error.response.data) {
       const { status, data } = response;
       handleCode(status, data.msg || message);
+      return Promise.reject(error);
+    } else {
+      let { message } = error;
+      if (message === "Network Error") {
+        message = "后端接口连接异常";
+      }
+      if (message.includes("timeout")) {
+        message = "后端接口请求超时";
+      }
+      if (message.includes("Request failed with status code")) {
+        const code = message.substr(message.length - 3);
+        message = "后端接口" + code + "异常";
+      }
+      Vue.prototype.$baseMessage(message || `后端接口未知异常`, "error");
       return Promise.reject(error);
     }
   }
